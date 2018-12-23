@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import io.dshuplyakov.hhc.dto.Account;
 import io.dshuplyakov.hhc.model.AccountDao;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -11,6 +12,7 @@ import java.util.*;
 /**
  * Created by Dmitry on 23.12.2018.
  */
+@Slf4j
 public class FilterController {
 
     @Inject
@@ -18,7 +20,7 @@ public class FilterController {
 
     public static final String LIMIT = "limit";
     public static final String OFFSET = "offset";
-    Joiner andJoiner = Joiner.on(" and ").skipNulls();
+    private Joiner andJoiner = Joiner.on(" and ").skipNulls();
 
     List<String> strFields = Arrays.asList("fname","sname","email","phone","sex","country","status");
     List<String> intFields = Arrays.asList("birth","joined");
@@ -43,7 +45,7 @@ public class FilterController {
         String limitAndOffset = addLimitAndOffset(query);
 
         String join = andJoiner.join(ops) + limitAndOffset ;
-        System.out.println(join);
+        log.debug(join);
         return join;
     }
 
@@ -88,7 +90,7 @@ public class FilterController {
                 op = "!=";
             } else if (parts[1].equals("lt")) {
                 op = "<";
-            } else if (parts[1].equals("qt")) {
+            } else if (parts[1].equals("gt")) {
                 op = ">";
             } else if (parts[1].equals("null")) {
                 op = "=''";
