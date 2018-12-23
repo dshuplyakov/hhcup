@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Slf4j
@@ -39,5 +41,19 @@ public class AccountDao {
         log.info("start insert");
         pstmt.executeBatch();
         log.info("finished");
+    }
+
+
+    public Account get(Long id) throws SQLException {
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery("select * from dima.account where id = " + id);
+        if (rs.next()) {
+            Account account = new Account();
+            account.setId(rs.getInt(1));
+            account.setFname(rs.getString(2));
+            return account;
+        }
+
+        return new Account();
     }
 }

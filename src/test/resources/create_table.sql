@@ -1,13 +1,13 @@
 CREATE TABLE `account` (
-  `id` UInt16,
-  `fname` FixedString(50),
-  `sname` FixedString(50),
-  `email` FixedString(100),
-  `phone ` FixedString(100),
-  `sex` FixedString(1),
+  `id` UInt32 ,
+  `fname` String,
+  `sname` String,
+  `email` String,
+  `phone` String,
+  `sex` String,
   `birth` Date,
-  `country` FixedString(50),
-  `city` FixedString(50),
+  `country` String,
+  `city` String,
   `joined` Date,
-  `status` FixedString(15)
+  `status` String
 ) ENGINE = Log;
