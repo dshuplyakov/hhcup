@@ -12,14 +12,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Account {
     private int id;
-    private String fname;
-    private String email;
-    private List<String> interests;
-    private String status;
     private String sex;
+    private String email;
+    private String fname;
+    private String sname;
     private String phone;
-    private Long birth;
-    private String city;
     private String country;
-    private Long joined;
+    private String city;
+    private Integer birth;
+    private String status;
+    private Integer joined;
+    private List<String> interests;
+   // private List<String> premium;
 }

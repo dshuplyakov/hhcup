@@ -1,4 +1,4 @@
-package io.dshuplyakov.hhc;
+package io.dshuplyakov.hhc.config;
 
 import lombok.Getter;
 import ru.yandex.clickhouse.ClickHouseDataSource;
@@ -12,9 +12,8 @@ public class Config {
 
     private ClickHouseDataSource dataSource;
     private Connection connection;
-    private static volatile Config config;
 
-    private Config() {
+    public Config() {
         ClickHouseProperties properties = new ClickHouseProperties();
         dataSource = new ClickHouseDataSource("jdbc:clickhouse://srv7-phumkaok:8123", properties);
         try {
@@ -22,15 +21,6 @@ public class Config {
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    public static Config getInstance(){
-        if (config == null) {
-            synchronized (Config.class) {
-                config = new Config();
-            }
-        }
-        return config;
     }
 
 }

@@ -5,9 +5,9 @@ CREATE TABLE `account` (
   `email` String,
   `phone` String,
   `sex` String,
-  `birth` Date,
+  `birth` UInt32,
   `country` String,
   `city` String,
-  `joined` Date,
+  `joined` UInt32,
   `status` String
 ) ENGINE = Log;

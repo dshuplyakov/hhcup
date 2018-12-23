@@ -14,10 +14,10 @@ import java.sql.SQLException;
  * Created by Dmitry on 21.12.2018.
  */
 @Slf4j
-public class Main {
+public class Import {
 
     public static void main(String[] args) throws IOException, SQLException {
-        System.out.println(11);
+
 
         byte[] jsonData = Files.readAllBytes(Paths.get("accounts_1.json"));
 
