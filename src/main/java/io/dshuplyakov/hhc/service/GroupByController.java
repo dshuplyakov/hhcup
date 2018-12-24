@@ -1,6 +1,7 @@
 package io.dshuplyakov.hhc.service;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import io.dshuplyakov.hhc.dto.Account;
 import io.dshuplyakov.hhc.model.AccountDao;
@@ -22,13 +23,15 @@ public class GroupByController {
     private AccountDao accountDao;
 
     private Joiner andJoiner = Joiner.on(" and ").skipNulls();
-
-    List<String> allowedFields = Arrays.asList("sex","status","interests","country","city");
+    private String selectSQL = "select %s, count() as cnt from dima.account";
+    List<String> allowedGroupByFields = Arrays.asList("sex","status","interests","country","city");
+    List<String> allowedWhereFields = Arrays.asList("fname","sname","email","phone","sex","birth","country","city","joined","status");
 
     //select country, count() as c from dima.account where birth = 800000000 group by country ORDER BY c
     ///accounts/group/?birth=1998&limit=4&order=-1&keys=country
-    public List<Account> filter (Map<String, Deque<String>> query) {
+    public Map<String, Integer> group(Map<String, Deque<String>> query) {
         String queryString = buildQueryString(query);
+        log.info(queryString);
         try {
             return accountDao.groupBy(queryString);
         } catch (SQLException e) {
@@ -38,24 +41,37 @@ public class GroupByController {
     }
 
     private String buildQueryString(Map<String, Deque<String>> query) {
-
+        String select = buildSelect(query);
         String where = buildWhere(query);
         String groupBy = buildGroupBy(query);
         String limit = buildLimit(query);
         String order = buildOrder(query);
 
-        return null;
+        return select + where + groupBy + order + limit;
+    }
+
+    private String buildSelect(Map<String, Deque<String>> query) {
+        String selectField = extractSelectField(query);
+        return String.format(selectSQL, selectField);
+    }
+
+    private String extractSelectField(Map<String, Deque<String>> query) {
+        String value = query.get("keys").getFirst();
+        if (!allowedGroupByFields.contains(value)) {
+            throw new IllegalArgumentException("No param \"key\"");
+        }
+        return value;
     }
 
     private String buildOrder(Map<String, Deque<String>> query) {
         if (query.containsKey(ORDER)) {
-            String orderValue = query.get(LIMIT).getFirst();
+            String orderValue = query.get(ORDER).getFirst();
             if (orderValue.equals("-1")) {
-                return "country ORDER BY c";
+                return " ORDER BY cnt DESC";
             }
 
             if (orderValue.equals("1")) {
-                return "country ORDER BY c";
+                return " ORDER BY cnt";
             }
         }
         return null;
@@ -70,7 +86,7 @@ public class GroupByController {
     }
 
     private String buildGroupBy(Map<String, Deque<String>> query) {
-        return " group by " + query.get("keys").getFirst();
+        return " group by " + extractSelectField(query);
     }
 
     private String buildWhere(Map<String, Deque<String>> query) {
@@ -80,12 +96,16 @@ public class GroupByController {
             result.add(s);
         }
 
-        return andJoiner.join(result);
+        String where = andJoiner.join(result);
+        if (!Strings.isNullOrEmpty(where)) {
+            where = " where "+where;
+        }
+        return where;
     }
 
     private String processWhere(String key, String value) {
-        if (allowedFields.contains(key)) {
-            return key+"="+value;
+        if (allowedWhereFields.contains(key)) {
+            return key+"='"+value+"'";
         }
         return null;
     }

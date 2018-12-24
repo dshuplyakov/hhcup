@@ -1,5 +1,6 @@
 package io.dshuplyakov.hhc.model;
 
+import com.google.common.base.Stopwatch;
 import com.google.inject.Inject;
 import io.dshuplyakov.hhc.config.Config;
 import io.dshuplyakov.hhc.dto.Account;
@@ -11,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class AccountDao {
@@ -43,12 +46,16 @@ public class AccountDao {
 
 
     public Account get(Long id) throws SQLException {
+        Stopwatch start = Stopwatch.createStarted();
         Statement stmt = config.getConnection().createStatement();
         ResultSet rs = stmt.executeQuery("select * from dima.account where id = " + id);
+        Account result = null;
         if (rs.next()) {
-            return rsMapToAccount(rs);
+            result = rsMapToAccount(rs);
         }
-        return null;
+
+        log.debug("DB request filter {}", start);
+        return result;
     }
 
     private Account rsMapToAccount(ResultSet rs) throws SQLException {
@@ -68,12 +75,30 @@ public class AccountDao {
     }
 
     public List<Account> filter(String query) throws SQLException {
+        Stopwatch start = Stopwatch.createStarted();
         Statement stmt = config.getConnection().createStatement();
         ResultSet rs = stmt.executeQuery("select * from dima.account where " + query);
         ArrayList<Account> accounts = new ArrayList<>();
         while (rs.next()) {
             accounts.add(rsMapToAccount(rs));
         }
+        start.stop();
+        log.debug("DB request filter {}", start);
         return accounts;
+    }
+
+    public Map<String, Integer> groupBy(String query) throws SQLException {
+        Stopwatch start = Stopwatch.createStarted();
+        Statement stmt = config.getConnection().createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        Map<String, Integer> result = new HashMap<>();
+        while (rs.next()) {
+            String key = rs.getString(1);
+            Integer value = rs.getInt(2);
+            result.put(key, value);
+        }
+        start.stop();
+        log.debug("DB request groupBy {}", start);
+        return result;
     }
 }
